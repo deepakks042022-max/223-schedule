@@ -1,1 +1,153 @@
 [{"name":"assets","type":"directory"},{"name":"data","type":"directory"},{"name":"index.html","type":"file"},{"name":"styles.css","type":"file"},{"name":"app.js","type":"file"},{"name":"manifest.webmanifest","type":"file"},{"name":"sw.js","type":"file"},{"name":"README.md","type":"file"}]
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b1f3a" />
+    <title>ShiftPro</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark">SP</div>
+        <div class="brand-text">
+          <div class="brand-title">ShiftPro</div>
+          <div class="brand-subtitle" id="subtitle">Loading schedule…</div>
+        </div>
+      </div>
+      <button class="icon-btn" id="btnInstallHelp" aria-label="Install help" title="Install">
+        <span>Install</span>
+      </button>
+    </header>
+
+    <main class="app-main">
+      <section class="page" id="page-home" data-page="home">
+        <div class="card">
+          <div class="card-title">Today’s Status</div>
+          <div class="today-row">
+            <div>
+              <div class="today-date" id="todayDate">—</div>
+              <div class="today-meta" id="todayMeta">—</div>
+            </div>
+            <div class="badge-wrap" id="todayBadgeWrap"></div>
+          </div>
+          <div class="today-shift" id="todayShift">—</div>
+          <div class="muted" id="todayCycle">—</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Next 7 days</div>
+          <div class="list" id="next7"></div>
+        </div>
+      </section>
+
+      <section class="page hidden" id="page-calendar" data-page="calendar">
+        <div class="toolbar">
+          <button class="btn" id="btnPrevMonth">Prev</button>
+          <div class="toolbar-title" id="monthTitle">—</div>
+          <button class="btn" id="btnNextMonth">Next</button>
+        </div>
+        <div class="dow">
+          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+        <div class="month-grid" id="monthGrid"></div>
+        <div class="muted" style="margin-top: 10px">
+          Tap a day to view/edit.
+        </div>
+      </section>
+
+      <section class="page hidden" id="page-search" data-page="search">
+        <div class="card">
+          <div class="card-title">Search by date</div>
+          <div class="row">
+            <input class="input" id="searchDate" type="date" />
+            <button class="btn primary" id="btnSearch">Search</button>
+          </div>
+          <div class="result" id="searchResult"></div>
+        </div>
+      </section>
+
+      <section class="page hidden" id="page-settings" data-page="settings">
+        <div class="card">
+          <div class="card-title">Theme</div>
+          <div class="settings-grid">
+            <label class="field">
+              <span>Primary (dark blue)</span>
+              <input class="input" id="themePrimary" type="color" value="#0b1f3a" />
+            </label>
+            <label class="field">
+              <span>Work badge</span>
+              <input class="input" id="themeWork" type="color" value="#2ee59d" />
+            </label>
+            <label class="field">
+              <span>Off badge</span>
+              <input class="input" id="themeOff" type="color" value="#8b98a8" />
+            </label>
+          </div>
+          <div class="row" style="margin-top: 12px">
+            <button class="btn" id="btnResetTheme">Reset</button>
+            <button class="btn primary" id="btnSaveTheme">Save</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Schedule</div>
+          <div class="muted">
+            Your default schedule is loaded from <code>data/schedule.csv</code>. You can override individual dates below, or import a new CSV file.
+          </div>
+          <div class="row" style="margin-top: 12px">
+            <input class="input" id="csvFile" type="file" accept=".csv,text/csv" />
+          </div>
+          <div class="row" style="margin-top: 12px">
+            <button class="btn" id="btnClearOverrides">Clear overrides</button>
+            <button class="btn" id="btnExportOverrides">Export overrides</button>
+          </div>
+          <div class="muted" id="settingsStatus" style="margin-top: 10px"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Install on iPhone</div>
+          <ol class="steps">
+            <li>Open this app in Safari.</li>
+            <li>Tap Share.</li>
+            <li>Tap “Add to Home Screen”.</li>
+          </ol>
+          <div class="muted">Once installed, it works offline after the first load.</div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="tabbar" role="navigation" aria-label="Main">
+      <button class="tab active" data-nav="home">Home</button>
+      <button class="tab" data-nav="calendar">Calendar</button>
+      <button class="tab" data-nav="search">Search</button>
+      <button class="tab" data-nav="settings">Settings</button>
+    </nav>
+
+    <dialog class="modal" id="dayModal">
+      <form method="dialog" class="modal-body">
+        <div class="modal-title" id="modalTitle">—</div>
+        <div class="modal-subtitle" id="modalSubtitle">—</div>
+
+        <div class="settings-grid" style="margin-top: 12px">
+          <label class="field">
+            <span>Status</span>
+            <select class="input" id="editStatus">
+              <option value="Work">Work</option>
+              <option value="Off">Off</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>Shift (optional)</span>
+            <input class="input" id="editShift" placeholder="6:00 AM–6:00 PM" />
+          </label>
+        </div>
+
+        <div class="row" style="margin-top: 12px">
+          <button class="btn" value="cancel">Cancel</button>
+          <button class="btn" id="btnDeleteOverride" value="delete">Remove override</button>
+          <button class="btn primary" id="btnSaveOverride" value="save">Save</button>
